@@ -1,25 +1,3 @@
-"""
-ner_extractor.py
------------------
-Extracts candidate name and organization names (employers, universities).
-
-Design note: this module is built "heuristic-first, ML-optional" on purpose.
-- The heuristics below (name = top-of-resume capitalized line, orgs = lines
-  inside Experience/Education that match a "Title at Company" / "Company |
-  Title" shape) are *deliberately* the primary path — they're fast, free,
-  fully explainable, and in practice work well specifically for resumes
-  (which are far more structurally predictable than general text).
-- spaCy's statistical NER model (en_core_web_sm) is wired in as an optional
-  cross-check/enhancement: if the model is installed, it's used to validate
-  or supplement the heuristic result. If it's not installed (or the download
-  is blocked by a network policy, as it is in some sandboxed environments),
-  the module silently falls back to heuristics only — it never hard-fails.
-
-This means the system is fully functional out of the box, and gets slightly
-more robust automatically once the spaCy model is available on a machine
-with normal internet access.
-"""
-
 from __future__ import annotations
 
 import re
@@ -54,9 +32,6 @@ _NOISE_WORDS = {
 
 
 def extract_name_heuristic(header_text: str, full_text: str) -> Optional[str]:
-    """A candidate's name is almost always one of the first non-empty lines,
-    written in Title Case, with no digits/emails/contact symbols.
-    """
     search_text = header_text if header_text.strip() else full_text
     for line in search_text.splitlines()[:8]:
         candidate = line.strip()
@@ -74,7 +49,6 @@ def extract_name_heuristic(header_text: str, full_text: str) -> Optional[str]:
 
 
 def extract_name(header_text: str, full_text: str) -> Optional[str]:
-    """Primary path: heuristic. Cross-check with spaCy NER if available."""
     heuristic_name = extract_name_heuristic(header_text, full_text)
 
     nlp = _get_spacy_model()
@@ -99,15 +73,6 @@ _ORG_LINE_PATTERNS = [
 
 
 def extract_organizations(section_text: str) -> List[str]:
-    """Heuristic extraction of organization names from an Experience or
-    Education section, using common resume line shapes.
-
-    Should be called with section text (e.g. ParsedResume.section('experience')),
-    not the whole resume — otherwise contact-info lines like
-    "email@x.com | +92 300 1234567" can superficially match the pipe-delimited
-    pattern below. As a defensive second layer, lines containing '@' or 'http'
-    are skipped outright regardless of what's calling this.
-    """
     orgs: List[str] = []
     for line in section_text.splitlines():
         line = line.strip()

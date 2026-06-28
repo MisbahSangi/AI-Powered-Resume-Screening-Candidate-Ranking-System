@@ -1,25 +1,3 @@
-"""
-vector_store.py
------------------
-Powers two bonus features — Vector Search and Multi-Job Candidate Matching —
-using plain numpy instead of a dedicated vector database (ChromaDB/FAISS).
-
-Why not ChromaDB here: at the scale this tool actually operates at (tens to
-a few hundred resumes per run, on one machine), nearest-neighbor search
-over a numpy matrix with scikit-learn's cosine_similarity is just as
-correct and has zero extra moving parts — no server process, no separate
-dependency that could itself fail to install or need a network call for its
-own default embedding model. The interface below is intentionally the same
-shape ChromaDB's API uses (add / query by vector), so swapping to ChromaDB
-later for a larger deployment is a contained, single-file change.
-
-Embedding space: every resume/JD passed in here is embedded with the SAME
-backend (whatever semantic_similarity.active_backend() resolves to), fit
-once across the whole corpus — unlike the pairwise comparisons in
-semantic_similarity.py, this module needs one shared coordinate space so
-"how similar is candidate A to candidate B" is meaningful.
-"""
-
 from __future__ import annotations
 
 import pickle
@@ -39,8 +17,6 @@ class VectorRecord:
 
 
 class VectorStore:
-    """In-memory vector store with optional disk persistence."""
-
     def __init__(self):
         self._vectorizer = None  # the fitted embedding model/vectorizer
         self._matrix: Optional[np.ndarray] = None
@@ -51,13 +27,6 @@ class VectorStore:
         return self._matrix is None or len(self._records) == 0
 
     def build(self, texts: List[str], records: List[VectorRecord]) -> None:
-        """Fit a shared embedding space over `texts` and store the vectors.
-
-        Tries sentence-transformers first (better semantics), falls back to
-        TF-IDF (always available) — same backend-detection pattern as
-        semantic_similarity.py, kept separate because this one needs a
-        *corpus-level* fit rather than a pairwise comparison.
-        """
         assert len(texts) == len(records), "texts and records must align 1:1"
 
         try:
@@ -83,12 +52,6 @@ class VectorStore:
         return model.transform([text]).toarray()[0]
 
     def most_similar(self, text: str, top_k: int = 5) -> List[Tuple[VectorRecord, float]]:
-        """Find the `top_k` stored records most similar to `text`.
-
-        Used for both Vector Search (find similar candidates to a resume)
-        and Multi-Job Matching (find candidates similar to a NEW job
-        description, without re-running the full extraction pipeline).
-        """
         if self.is_empty:
             return []
         query_vec = self._embed_query(text).reshape(1, -1)
@@ -97,10 +60,6 @@ class VectorStore:
         return [(rec, round(float(score), 4)) for rec, score in ranked[:top_k]]
 
     def cluster(self, n_clusters: int = 3) -> dict:
-        """Bonus feature: candidate clustering via KMeans over the same
-        embedding space — free once the embeddings already exist.
-        Returns {cluster_label: [record_id, ...]}.
-        """
         from sklearn.cluster import KMeans
 
         if self.is_empty or len(self._records) < n_clusters:

@@ -1,16 +1,3 @@
-"""
-database.py
--------------
-SQLite storage for candidates, job descriptions, and score breakdowns.
-
-SQLite (not Postgres/Mongo) is a deliberate choice here, not a shortcut:
-this is a single-machine recruiter tool processing at most a few hundred
-resumes per run, and SQLite needs zero setup — no server, no connection
-string, just a file. If this ever needs to scale to a multi-user web
-service, swapping the connection logic for Postgres is a contained change
-because all SQL goes through this one module.
-"""
-
 from __future__ import annotations
 
 import json

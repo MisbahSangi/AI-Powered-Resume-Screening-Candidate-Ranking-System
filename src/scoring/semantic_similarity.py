@@ -1,26 +1,3 @@
-"""
-semantic_similarity.py
------------------------
-Computes how semantically similar a resume is to a job description — this
-is what catches matches that pure keyword/skill overlap misses (e.g. "Built
-REST APIs with FastAPI" vs a JD asking for "Python web framework experience").
-
-Two backends, auto-selected:
-
-  1. TF-IDF + cosine similarity (scikit-learn). Zero downloads, runs anywhere,
-     this is the default and what's actually tested in this build.
-  2. Sentence-Transformers (all-MiniLM-L6-v2) embeddings + cosine similarity.
-     Genuinely better at semantic equivalence (it understands that "FastAPI"
-     relates to "Python web framework" even with zero shared words), but it
-     requires downloading model weights from Hugging Face on first use —
-     which this sandbox's network policy blocks, so it could not be tested
-     here. The code auto-activates on any machine with normal internet
-     access (`pip install sentence-transformers` is all that's needed).
-
-Either way, the *scoring engine* that calls this module never needs to know
-which backend is active — it just gets a 0..1 similarity float back.
-"""
-
 from __future__ import annotations
 
 from typing import Optional
@@ -46,9 +23,6 @@ def _try_load_sentence_transformer():
 
 
 def active_backend() -> str:
-    """Report which similarity backend is actually active. Useful for the
-    dashboard/README so the user always knows what produced a given score.
-    """
     global _BACKEND_IN_USE
     if _BACKEND_IN_USE is None:
         _try_load_sentence_transformer()
@@ -85,9 +59,6 @@ def _sbert_similarity(text_a: str, text_b: str, model) -> float:
 
 
 def compute_similarity(text_a: str, text_b: str) -> float:
-    """Return a 0..1 similarity score between two texts, using the best
-    available backend.
-    """
     model = _try_load_sentence_transformer()
     if model is not None:
         return _sbert_similarity(text_a, text_b, model)

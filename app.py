@@ -1,12 +1,3 @@
-"""
-app.py
--------
-Streamlit dashboard for the AI-Powered Resume Screening & Candidate Ranking
-System (Teyzix Core, Task AI-2).
-
-Run with:  streamlit run app.py
-"""
-
 from __future__ import annotations
 
 import io

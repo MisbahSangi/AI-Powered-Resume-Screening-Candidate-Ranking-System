@@ -1,17 +1,3 @@
-"""
-resume_parser.py
------------------
-Layer 1 of the pipeline: turn a raw resume file (PDF / DOCX / TXT) into clean
-text, then split that text into labeled sections (Education, Experience,
-Skills, Projects, Certifications).
-
-Why section detection matters: once we know "this paragraph is the Education
-section", every downstream extractor (skills, dates, degree level) can look
-in the right place instead of guessing across the whole document. This single
-step is responsible for a large chunk of the accuracy gain over naive
-whole-document parsing.
-"""
-
 from __future__ import annotations
 
 import re
@@ -42,20 +28,16 @@ SECTION_HEADERS: Dict[str, List[str]] = {
 
 @dataclass
 class ParsedResume:
-    """Container for a resume after extraction + section splitting."""
-
     source_path: str
     raw_text: str
     sections: Dict[str, str] = field(default_factory=dict)
     parse_warnings: List[str] = field(default_factory=list)
 
     def section(self, name: str) -> str:
-        """Return the text of a section, or '' if it wasn't found."""
         return self.sections.get(name, "")
 
 
 def extract_text_from_pdf(path: Path) -> str:
-    """Extract text from a PDF, page by page, preserving line breaks."""
     import pdfplumber
 
     chunks: List[str] = []
@@ -67,7 +49,6 @@ def extract_text_from_pdf(path: Path) -> str:
 
 
 def extract_text_from_docx(path: Path) -> str:
-    """Extract text from a .docx file, paragraph by paragraph."""
     import docx
 
     document = docx.Document(str(path))
@@ -84,7 +65,6 @@ def extract_text_from_txt(path: Path) -> str:
 
 
 def extract_text(path: Path) -> str:
-    """Dispatch to the right extractor based on file extension."""
     ext = path.suffix.lower()
     if ext == ".pdf":
         return extract_text_from_pdf(path)
@@ -98,12 +78,6 @@ def extract_text(path: Path) -> str:
 
 
 def _build_header_regex() -> re.Pattern:
-    """Combine all section header patterns into one alternation regex.
-
-    A line is treated as a header if, after stripping punctuation, it matches
-    one of the known header patterns AND is short (headers are rarely full
-    sentences) AND doesn't end with typical sentence punctuation.
-    """
     all_patterns = []
     for patterns in SECTION_HEADERS.values():
         all_patterns.extend(patterns)
@@ -115,7 +89,6 @@ _HEADER_RE = _build_header_regex()
 
 
 def _classify_header(line: str) -> str | None:
-    """Return the canonical section name if `line` looks like a header."""
     cleaned = line.strip()
     if not cleaned or len(cleaned) > 40:
         return None
@@ -130,11 +103,6 @@ def _classify_header(line: str) -> str | None:
 
 
 def split_into_sections(raw_text: str) -> Dict[str, str]:
-    """Split resume text into sections keyed by canonical section name.
-
-    Any text appearing before the first recognized header is kept under the
-    'header' key (this is usually name / contact info / a one-line title).
-    """
     lines = raw_text.splitlines()
     sections: Dict[str, List[str]] = {"header": []}
     current = "header"
@@ -151,7 +119,6 @@ def split_into_sections(raw_text: str) -> Dict[str, str]:
 
 
 def parse_resume(path: str | Path) -> ParsedResume:
-    """Full Layer-1 pipeline: read file -> extract text -> split sections."""
     path = Path(path)
     warnings: List[str] = []
 

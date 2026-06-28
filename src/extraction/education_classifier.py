@@ -1,17 +1,3 @@
-"""
-education_classifier.py
-------------------------
-Maps mentions of a degree to an ordinal education level, so candidate vs
-job-requirement education can be compared with a simple ">=" check instead
-of fuzzy text matching.
-
-Level scale:
-  0 = none detected
-  1 = Diploma / Associate degree
-  2 = Bachelor's degree
-  3 = Master's degree
-  4 = PhD / Doctorate
-"""
 
 from __future__ import annotations
 
@@ -42,7 +28,6 @@ _COMPILED = [(level, re.compile(pat, re.IGNORECASE)) for level, pat in _PATTERNS
 
 
 def extract_education_level(text: str) -> int:
-    """Return the highest education level mentioned anywhere in `text`."""
     best = 0
     for level, pattern in _COMPILED:
         if pattern.search(text):

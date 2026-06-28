@@ -1,20 +1,3 @@
-"""
-skill_matcher.py
------------------
-This is the explainable backbone of "skill matching" as an AI feature.
-
-Instead of asking a model "what skills does this person have" (which can
-hallucinate skills that aren't really there, or phrase real ones
-differently every time you ask), we match resume text against a curated
-skill taxonomy:
-  1. Exact / multi-word phrase matching (skill names + known synonyms)
-  2. Fuzzy matching via RapidFuzz, to tolerate typos and minor variants
-
-The payoff: for every skill we claim a candidate has, we can point to the
-exact line of text that proves it. That traceability is what "explainable
-scoring methodology" actually means in practice.
-"""
-
 from __future__ import annotations
 
 import json
@@ -35,7 +18,6 @@ class SkillMatch:
 
 
 class SkillTaxonomy:
-    """Loads the skill taxonomy JSON and builds fast lookup structures."""
 
     def __init__(self, taxonomy_path: str | Path):
         with open(taxonomy_path, "r", encoding="utf-8") as f:
@@ -70,11 +52,6 @@ def find_skills(
     taxonomy: SkillTaxonomy,
     fuzzy_threshold: int = 88,
 ) -> List[SkillMatch]:
-    """Find every taxonomy skill present in `text`.
-
-    Returns one SkillMatch per *canonical* skill found (deduplicated), with
-    the matched substring kept for auditability.
-    """
     normalized = _normalize(text)
     found: Dict[str, SkillMatch] = {}
 

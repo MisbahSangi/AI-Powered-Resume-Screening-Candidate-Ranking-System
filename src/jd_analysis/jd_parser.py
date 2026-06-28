@@ -1,17 +1,3 @@
-"""
-jd_parser.py
-------------
-Layer 3: turn a raw job description into structured requirements, reusing
-the same skill taxonomy matcher from Layer 2 so candidate skills and job
-requirements are compared on the same vocabulary.
-
-Required vs preferred skills are split by looking for common section
-headers ("Requirements" / "Must have" vs "Preferred" / "Nice to have").
-If no such split exists in the JD, every matched skill is treated as
-required (the safer default — better to flag a missing "preferred" skill
-than to silently ignore a hard requirement).
-"""
-
 from __future__ import annotations
 
 import re
@@ -43,10 +29,6 @@ class JobRequirements:
 
 
 def _split_required_preferred(text: str) -> tuple[str, str]:
-    """Split JD text into (required_block, preferred_block) by scanning for
-    section-like headers. If no 'preferred' section is found, everything
-    is treated as required.
-    """
     lines = text.splitlines()
     required_lines: List[str] = []
     preferred_lines: List[str] = []
@@ -66,10 +48,6 @@ def _split_required_preferred(text: str) -> tuple[str, str]:
 
 
 def _extract_required_years(text: str) -> float:
-    """Grab the largest 'N years' figure mentioned — JDs sometimes mention
-    smaller numbers for unrelated context, so we take the max as the
-    intended minimum experience bar.
-    """
     matches = _EXPERIENCE_YEARS_RE.findall(text)
     if not matches:
         return 0.0

@@ -1,18 +1,3 @@
-"""
-experience_calculator.py
--------------------------
-Turns the raw date ranges found by regex_extractors.extract_date_ranges()
-into a single "total years of experience" number.
-
-Handles two things naive sum-of-durations would get wrong:
-  1. "Present" / "Current" needs to resolve to today's date.
-  2. Overlapping ranges (e.g. a part-time job overlapping a degree) must be
-     merged, or experience gets double-counted.
-
-Every step here is plain arithmetic — there is nothing to hide and nothing
-for a model to get subtly wrong.
-"""
-
 from __future__ import annotations
 
 import datetime
@@ -26,7 +11,6 @@ _MONTH_MAP = {
 
 
 def _parse_single_date(token: str, *, end_of_period: bool) -> datetime.date:
-    """Parse a date token like 'Jan 2022', '2022', or 'Present'."""
     token = token.strip()
     if token.lower() in ("present", "current", "now"):
         return datetime.date.today()
@@ -49,9 +33,6 @@ def _parse_single_date(token: str, *, end_of_period: bool) -> datetime.date:
 def _merge_intervals(
     intervals: List[Tuple[datetime.date, datetime.date]]
 ) -> List[Tuple[datetime.date, datetime.date]]:
-    """Merge overlapping (start, end) date intervals so total duration
-    doesn't double-count concurrent roles.
-    """
     if not intervals:
         return []
     intervals = sorted(intervals, key=lambda iv: iv[0])
@@ -68,13 +49,6 @@ def _merge_intervals(
 def calculate_total_experience_years(
     date_ranges: List[Tuple[str, str]]
 ) -> float:
-    """Given a list of (start_str, end_str) tuples, return total years of
-    experience as a float, merging overlapping periods.
-
-    Unparseable ranges are silently skipped rather than crashing the whole
-    pipeline on one malformed date — they simply don't contribute to the
-    total (a conservative failure mode: undercounting rather than guessing).
-    """
     intervals: List[Tuple[datetime.date, datetime.date]] = []
     for start_str, end_str in date_ranges:
         try:

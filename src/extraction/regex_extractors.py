@@ -1,15 +1,3 @@
-"""
-regex_extractors.py
---------------------
-Deterministic, zero-ML extraction for fields that are unambiguous patterns:
-email, phone, LinkedIn/GitHub/portfolio links, and date ranges.
-
-Using regex here instead of an LLM isn't a compromise — it's the *better*
-engineering choice. An email address is a precise pattern; asking a model to
-"find the email" adds cost, latency, and a (small but real) chance of error
-for something regex gets right 100% of the time.
-"""
-
 from __future__ import annotations
 
 import re
@@ -41,7 +29,6 @@ def extract_email(text: str) -> Optional[str]:
 
 
 def extract_phone(text: str) -> Optional[str]:
-    """Find the first plausible phone number (at least 7 digits total)."""
     for match in PHONE_RE.finditer(text):
         digits = re.sub(r"\D", "", match.group(0))
         if len(digits) >= 7:
@@ -50,7 +37,6 @@ def extract_phone(text: str) -> Optional[str]:
 
 
 def extract_links(text: str) -> dict:
-    """Return a dict with 'linkedin', 'github', and 'other' URLs found."""
     linkedin = LINKEDIN_RE.search(text)
     github = GITHUB_RE.search(text)
     all_urls = set(GENERIC_URL_RE.findall(text)) if False else set(
@@ -68,11 +54,6 @@ def extract_links(text: str) -> dict:
 
 
 def extract_date_ranges(text: str) -> List[Tuple[str, str]]:
-    """Return a list of (start, end) date string tuples found in the text.
-
-    `end` may be the literal string 'Present' (case-normalized) to indicate
-    an ongoing role — this is handled downstream in experience_calculator.
-    """
     ranges = []
     for match in DATE_RANGE_RE.finditer(text):
         start, end = match.group(1), match.group(2)

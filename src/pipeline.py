@@ -1,14 +1,3 @@
-"""
-pipeline.py
-------------
-Orchestrates every layer into one call: raw resume file + job description
-text in, a fully explainable ScoreBreakdown out.
-
-This is the one file that "knows about" every module — every individual
-extractor/scorer stays independently testable and doesn't need to know
-about the others.
-"""
-
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
@@ -30,10 +19,6 @@ DEFAULT_TAXONOMY_PATH = Path(__file__).resolve().parents[1] / "data" / "skills_t
 
 @dataclass
 class CandidateProfile:
-    """Everything extracted from one resume, before scoring against any
-    particular job. Kept separate from ScoreBreakdown because the same
-    candidate can be scored against multiple jobs without re-parsing.
-    """
 
     source_path: str
     name: Optional[str]
@@ -94,7 +79,6 @@ def build_candidate_profile(resume_path: str | Path, taxonomy: SkillTaxonomy) ->
 
 
 def build_job_requirements(jd_text: str, taxonomy: SkillTaxonomy) -> JobRequirements:
-    """Layer 3: parse a job description into structured requirements."""
     return parse_job_description(jd_text, taxonomy)
 
 
@@ -110,9 +94,6 @@ def score_candidate_against_job(
     jd: JobRequirements,
     weights: ScoringWeights | None = None,
 ) -> CandidateResult:
-    """Layer 4 + 5: score one candidate against one job, with a deterministic
-    recommendation string attached.
-    """
     breakdown = score_candidate(
         candidate_skills=set(profile.skills),
         candidate_resume_text=profile.raw_text,
