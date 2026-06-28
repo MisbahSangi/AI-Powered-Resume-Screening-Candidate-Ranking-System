@@ -1,0 +1,26 @@
+Job Title: Backend Software Engineer (Python)
+
+About the role:
+We are looking for a Backend Software Engineer to join our growing engineering team.
+You will design, build, and maintain server-side applications and APIs that power our
+core product.
+
+Requirements:
+- 3+ years of professional software development experience
+- Strong proficiency in Python
+- Experience building REST APIs (FastAPI or Django)
+- Hands-on experience with relational databases such as PostgreSQL or MySQL
+- Familiarity with Git and collaborative version control workflows
+- Bachelor's degree in Computer Science, Software Engineering, or related field
+
+Preferred (nice to have):
+- Experience with Docker and containerized deployments
+- Familiarity with machine learning or NLP concepts
+- Exposure to cloud platforms such as AWS or Azure
+- Experience with CI/CD pipelines
+
+Responsibilities:
+- Design and implement scalable backend services
+- Write clean, well-tested, maintainable code
+- Collaborate with frontend and product teams to ship features
+- Participate in code reviews and technical design discussions

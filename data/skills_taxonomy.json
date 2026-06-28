@@ -1,0 +1,133 @@
+{
+  "_comment": "Master skill list used for explainable skill matching. Each canonical skill maps to a list of synonyms/aliases that should be treated as the same skill. Extend this freely for other domains (the matching code doesn't care what's in here).",
+
+  "programming_languages": {
+    "Python": ["python", "python3"],
+    "JavaScript": ["javascript", "js", "es6", "ecmascript"],
+    "TypeScript": ["typescript", "ts"],
+    "Java": ["java"],
+    "C++": ["c++", "cpp"],
+    "C#": ["c#", "csharp", ".net c#"],
+    "C": ["c programming", " c "],
+    "Go": ["golang", "go lang"],
+    "Rust": ["rust"],
+    "PHP": ["php"],
+    "Ruby": ["ruby"],
+    "Swift": ["swift"],
+    "Kotlin": ["kotlin"],
+    "Dart": ["dart"],
+    "R": ["r programming", "r language"],
+    "SQL": ["sql", "structured query language"],
+    "Bash": ["bash", "shell scripting", "shell script"]
+  },
+
+  "frameworks_libraries": {
+    "React": ["react", "react.js", "reactjs"],
+    "Next.js": ["next.js", "nextjs"],
+    "Vue.js": ["vue", "vue.js", "vuejs"],
+    "Angular": ["angular", "angularjs"],
+    "Node.js": ["node", "node.js", "nodejs"],
+    "Express.js": ["express", "express.js", "expressjs"],
+    "Django": ["django"],
+    "Flask": ["flask"],
+    "FastAPI": ["fastapi", "fast api"],
+    "Spring Boot": ["spring boot", "spring framework", "spring"],
+    "Flutter": ["flutter"],
+    "React Native": ["react native"],
+    "TensorFlow": ["tensorflow", "tf"],
+    "PyTorch": ["pytorch", "torch"],
+    "Scikit-learn": ["scikit-learn", "sklearn"],
+    "Pandas": ["pandas"],
+    "NumPy": ["numpy"],
+    "Hugging Face Transformers": ["huggingface", "hugging face", "transformers library"],
+    "spaCy": ["spacy"],
+    "NLTK": ["nltk"],
+    "LangChain": ["langchain"],
+    "Bootstrap": ["bootstrap"],
+    "Tailwind CSS": ["tailwind", "tailwindcss", "tailwind css"],
+    "jQuery": ["jquery"]
+  },
+
+  "databases": {
+    "MySQL": ["mysql"],
+    "PostgreSQL": ["postgresql", "postgres"],
+    "MongoDB": ["mongodb", "mongo"],
+    "SQLite": ["sqlite"],
+    "Redis": ["redis"],
+    "Firebase": ["firebase", "firestore"],
+    "Supabase": ["supabase"],
+    "Oracle Database": ["oracle db", "oracle database"],
+    "Microsoft SQL Server": ["mssql", "sql server"],
+    "ChromaDB": ["chromadb", "chroma"],
+    "FAISS": ["faiss"],
+    "Pinecone": ["pinecone"],
+    "DynamoDB": ["dynamodb"]
+  },
+
+  "cloud_devops": {
+    "AWS": ["aws", "amazon web services"],
+    "Azure": ["azure", "microsoft azure"],
+    "Google Cloud Platform": ["gcp", "google cloud"],
+    "Docker": ["docker", "containerization"],
+    "Kubernetes": ["kubernetes", "k8s"],
+    "CI/CD": ["ci/cd", "continuous integration", "continuous deployment"],
+    "GitHub Actions": ["github actions"],
+    "Jenkins": ["jenkins"],
+    "Terraform": ["terraform"],
+    "Linux": ["linux", "unix"],
+    "Nginx": ["nginx"],
+    "Vercel": ["vercel"],
+    "Netlify": ["netlify"],
+    "Heroku": ["heroku"]
+  },
+
+  "data_ai_ml": {
+    "Machine Learning": ["machine learning", "ml"],
+    "Deep Learning": ["deep learning", "dl"],
+    "Natural Language Processing": ["nlp", "natural language processing"],
+    "Computer Vision": ["computer vision", "cv"],
+    "Data Analysis": ["data analysis", "data analytics"],
+    "Data Visualization": ["data visualization", "dataviz"],
+    "Large Language Models": ["llm", "llms", "large language model"],
+    "Vector Databases": ["vector database", "vector db", "vector search"],
+    "Sentence Transformers": ["sentence transformers", "sentence-transformers"],
+    "OpenCV": ["opencv"],
+    "Power BI": ["power bi", "powerbi"],
+    "Excel": ["excel", "ms excel", "microsoft excel"],
+    "Tableau": ["tableau"]
+  },
+
+  "tools_platforms": {
+    "Git": ["git"],
+    "GitHub": ["github"],
+    "GitLab": ["gitlab"],
+    "Jira": ["jira"],
+    "Postman": ["postman"],
+    "Figma": ["figma"],
+    "VS Code": ["vs code", "visual studio code", "vscode"],
+    "Selenium": ["selenium"],
+    "Jupyter Notebook": ["jupyter", "jupyter notebook"],
+    "Google Colab": ["colab", "google colab"]
+  },
+
+  "methodologies": {
+    "Agile": ["agile", "agile methodology"],
+    "Scrum": ["scrum"],
+    "Test-Driven Development": ["tdd", "test-driven development"],
+    "RESTful APIs": ["rest api", "restful", "rest apis"],
+    "GraphQL": ["graphql"],
+    "Microservices": ["microservices", "microservice architecture"],
+    "Unit Testing": ["unit testing", "unit tests"],
+    "Object-Oriented Programming": ["oop", "object oriented programming", "object-oriented design"]
+  },
+
+  "soft_skills": {
+    "Communication": ["communication", "communication skills"],
+    "Teamwork": ["teamwork", "team player", "collaboration"],
+    "Leadership": ["leadership", "team lead", "team leadership"],
+    "Problem Solving": ["problem solving", "problem-solving"],
+    "Time Management": ["time management"],
+    "Critical Thinking": ["critical thinking"],
+    "Adaptability": ["adaptability", "flexibility"]
+  }
+}

@@ -1,0 +1,24 @@
+Sara Malik
+sara.malik@email.com | +92 312 9876543
+linkedin.com/in/saramalik
+
+SUMMARY
+Junior developer with one year of experience building web applications, eager
+to grow into a backend-focused role.
+
+SKILLS
+Python, Flask, SQLite, JavaScript, React, Git, HTML, CSS
+
+EXPERIENCE
+Junior Web Developer at PixelWave Studio
+Sep 2024 - Present
+Built small Flask applications and contributed to a React-based admin
+dashboard. Used SQLite for local development and basic Git workflows for
+version control.
+
+EDUCATION
+Bachelor of Science in Software Engineering, COMSATS University Islamabad
+2019 - 2023
+
+PROJECTS
+Personal blog platform - Flask + SQLite, with a simple React front end.

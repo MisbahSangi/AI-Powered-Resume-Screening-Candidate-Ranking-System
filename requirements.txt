@@ -1,0 +1,40 @@
+# Core dependencies — required for the system to run.
+#
+# NOTE: these are intentionally unpinned (no ==version). The original pinned
+# versions were captured from a Python 3.12 build environment, and one of
+# them (scikit-learn==1.8.0) silently requires Python >=3.11 — which broke
+# the whole install on Python 3.10 (pip aborts the entire requirements.txt
+# install if even one exact pin is unsatisfiable, even if it's not yours).
+# Leaving these unpinned lets pip pick whatever version is actually
+# compatible with your installed Python.
+pdfplumber
+python-docx
+rapidfuzz
+scikit-learn
+pandas
+numpy
+streamlit
+matplotlib
+spacy
+
+# --- Optional upgrade path (not required to run the system) ---
+#
+# Install these AND run the two setup commands below to automatically
+# upgrade two components from their dependency-light fallback to a
+# stronger ML-based version. The pipeline detects what's available at
+# runtime — nothing else needs to change.
+#
+#   pip install sentence-transformers
+#       -> semantic_similarity.py and vector_store.py switch from
+#          TF-IDF cosine similarity to all-MiniLM-L6-v2 embeddings.
+#
+#   python -m spacy download en_core_web_sm
+#       -> ner_extractor.py adds spaCy NER as a cross-check on top of
+#          the heuristic name/organization extraction.
+#
+# Both were left out of the pinned list above because they require
+# downloading model weights from the internet (Hugging Face Hub /
+# GitHub release assets respectively) on first use, which was blocked
+# in the sandboxed environment this project was built in. They are
+# expected to work normally on a machine with standard internet access.
+# sentence-transformers

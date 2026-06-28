@@ -191,16 +191,3 @@ python -m pytest tests/test_pipeline.py -v
 | Keyword extraction | TF-IDF sentence scoring (summarizer) + skill matching |
 | Recommendation generation | `generate_recommendation()` — deterministic, from score breakdown |
 
-## Bonus features implemented
-
-- **Skill Gap Analysis** — aggregated missing-required-skills view across all candidates (dashboard)
-- **Vector Search** — "find similar candidates" using a numpy-based embedding store
-- **Multi-Job Candidate Matching** — the same vector store can be queried with a *new* job description to find matching candidates without re-running extraction
-- **Candidate Clustering** — `VectorStore.cluster()` (KMeans over the same embedding space)
-
-Not implemented given the project's tight 2-day timeline (genuinely useful,
-but not free the way the above are): Interview Question Generation, AI Chat
-Assistant for Recruiters, Resume Improvement Suggestions. The cleanest
-extension point for these is a local LLM (e.g. Ollama) used purely to
-*phrase* output from the existing deterministic data — see the docstring in
-`summarizer.generate_recommendation()`.

@@ -1,0 +1,250 @@
+"""
+app.py
+-------
+Streamlit dashboard for the AI-Powered Resume Screening & Candidate Ranking
+System (Teyzix Core, Task AI-2).
+
+Run with:  streamlit run app.py
+"""
+
+from __future__ import annotations
+
+import io
+import tempfile
+from pathlib import Path
+
+import pandas as pd
+import streamlit as st
+
+from src.extraction.education_classifier import level_label
+from src.extraction.skill_matcher import SkillTaxonomy
+from src.jd_analysis.jd_parser import parse_job_description
+from src.pipeline import build_candidate_profile, score_candidate_against_job
+from src.scoring.scoring_engine import ScoringWeights
+from src.scoring.semantic_similarity import active_backend
+from src.storage.vector_store import VectorRecord, VectorStore
+
+TAXONOMY_PATH = Path(__file__).resolve().parent / "data" / "skills_taxonomy.json"
+
+st.set_page_config(page_title="Resume Screening & Ranking", layout="wide")
+
+
+@st.cache_resource
+def get_taxonomy() -> SkillTaxonomy:
+    return SkillTaxonomy(TAXONOMY_PATH)
+
+
+def save_uploaded_file(uploaded_file) -> Path:
+    suffix = Path(uploaded_file.name).suffix
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
+    tmp.write(uploaded_file.getbuffer())
+    tmp.close()
+    return Path(tmp.name)
+
+
+def render_score_breakdown_chart(breakdown) -> None:
+    import matplotlib.pyplot as plt
+
+    labels = ["Skill", "Semantic", "Experience", "Education"]
+    values = [
+        breakdown.skill_score,
+        breakdown.semantic_score,
+        breakdown.experience_score,
+        breakdown.education_score,
+    ]
+    fig, ax = plt.subplots(figsize=(4, 2.2))
+    bars = ax.barh(labels, values, color="#4C72B0")
+    ax.set_xlim(0, 1)
+    ax.set_xlabel("Sub-score (0-1)")
+    for bar, value in zip(bars, values):
+        ax.text(value + 0.02, bar.get_y() + bar.get_height() / 2, f"{value:.2f}", va="center")
+    fig.tight_layout()
+    st.pyplot(fig)
+
+
+def main():
+    st.title("AI-Powered Resume Screening & Candidate Ranking")
+    st.caption(
+        "Hybrid pipeline: rule-based extraction + skill-taxonomy matching + "
+        "semantic similarity, with a fully explainable scoring breakdown per candidate."
+    )
+
+    with st.sidebar:
+        st.header("1. Job description")
+        jd_input_mode = st.radio("Input method", ["Paste text", "Upload file"], horizontal=True)
+        jd_text = ""
+        if jd_input_mode == "Paste text":
+            jd_text = st.text_area("Paste the job description", height=220)
+        else:
+            jd_file = st.file_uploader("Upload JD (.txt)", type=["txt"])
+            if jd_file is not None:
+                jd_text = jd_file.read().decode("utf-8", errors="ignore")
+
+        st.header("2. Resumes")
+        resume_files = st.file_uploader(
+            "Upload resumes", type=["pdf", "docx", "txt"], accept_multiple_files=True
+        )
+
+        st.header("3. Scoring weights")
+        st.caption("Must sum to 1.0 — defaults reflect the rationale in the README.")
+        w_skill = st.slider("Skill match", 0.0, 1.0, 0.40, 0.05)
+        w_semantic = st.slider("Semantic similarity", 0.0, 1.0, 0.25, 0.05)
+        w_experience = st.slider("Experience", 0.0, 1.0, 0.20, 0.05)
+        w_education = st.slider("Education", 0.0, 1.0, 0.15, 0.05)
+        weight_sum = w_skill + w_semantic + w_experience + w_education
+        st.caption(f"Current sum: {weight_sum:.2f}")
+
+        run_clicked = st.button("Process & rank candidates", type="primary")
+
+    st.caption(f"Active semantic-similarity backend: **{active_backend()}**")
+
+    if not run_clicked:
+        st.info("Add a job description and one or more resumes in the sidebar, then click **Process & rank candidates**.")
+        return
+
+    if not jd_text.strip():
+        st.error("Please provide a job description first.")
+        return
+    if not resume_files:
+        st.error("Please upload at least one resume.")
+        return
+    if abs(weight_sum - 1.0) > 1e-6:
+        st.error(f"Scoring weights must sum to 1.0 (currently {weight_sum:.2f}). Adjust the sliders.")
+        return
+
+    taxonomy = get_taxonomy()
+    jd = parse_job_description(jd_text, taxonomy)
+    weights = ScoringWeights(skill=w_skill, semantic=w_semantic, experience=w_experience, education=w_education)
+
+    with st.expander("Parsed job requirements", expanded=False):
+        st.write("**Required skills:**", ", ".join(sorted(jd.required_skills)) or "_none detected_")
+        st.write("**Preferred skills:**", ", ".join(sorted(jd.preferred_skills)) or "_none detected_")
+        st.write("**Required experience:**", f"{jd.required_experience_years:.0f}+ years")
+        st.write("**Required education:**", level_label(jd.required_education_level))
+
+    results = []
+    profiles_for_vectors = []
+    with st.spinner(f"Processing {len(resume_files)} resume(s)..."):
+        for uploaded in resume_files:
+            path = save_uploaded_file(uploaded)
+            try:
+                profile = build_candidate_profile(path, taxonomy)
+            except Exception as exc:
+                st.warning(f"Could not parse {uploaded.name}: {exc}")
+                continue
+            result = score_candidate_against_job(profile, jd, weights)
+            results.append((uploaded.name, result))
+            profiles_for_vectors.append(profile)
+
+    if not results:
+        st.error("No resumes could be processed.")
+        return
+
+    results.sort(key=lambda pair: pair[1].breakdown.final_score, reverse=True)
+
+    # --- Ranked table ---
+    st.subheader("Ranked candidates")
+    table_rows = []
+    for rank, (filename, result) in enumerate(results, start=1):
+        b = result.breakdown
+        table_rows.append(
+            {
+                "Rank": rank,
+                "Name": result.profile.name or filename,
+                "Final score": round(b.final_score * 100, 1),
+                "Skill": b.skill_score,
+                "Semantic": b.semantic_score,
+                "Experience (yrs)": result.profile.experience_years,
+                "Education": level_label(result.profile.education_level),
+                "Recommendation": result.recommendation,
+            }
+        )
+    df = pd.DataFrame(table_rows)
+    st.dataframe(df, width='stretch', hide_index=True)
+
+    csv_buffer = io.StringIO()
+    df.to_csv(csv_buffer, index=False)
+    st.download_button("Export rankings as CSV", csv_buffer.getvalue(), "candidate_rankings.csv", "text/csv")
+
+    # --- Skill gap analysis (bonus feature) ---
+    with st.expander("Skill gap analysis across all candidates (bonus feature)"):
+        all_missing = {}
+        for _, result in results:
+            for skill in result.breakdown.missing_required_skills:
+                all_missing[skill] = all_missing.get(skill, 0) + 1
+        if all_missing:
+            gap_df = pd.DataFrame(
+                sorted(all_missing.items(), key=lambda kv: kv[1], reverse=True),
+                columns=["Missing required skill", "Number of candidates missing it"],
+            )
+            st.dataframe(gap_df, width='stretch', hide_index=True)
+        else:
+            st.write("No required-skill gaps found across the candidate pool.")
+
+    # --- Per-candidate detail ---
+    st.subheader("Candidate detail")
+    names = [f"{rank}. {result.profile.name or filename}" for rank, (filename, result) in enumerate(results, start=1)]
+    selected = st.selectbox("Select a candidate", names)
+    idx = names.index(selected)
+    filename, result = results[idx]
+    profile, breakdown = result.profile, result.breakdown
+
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        st.markdown(f"**Email:** {profile.email or '—'}")
+        st.markdown(f"**Phone:** {profile.phone or '—'}")
+        st.markdown(f"**LinkedIn:** {profile.linkedin or '—'}")
+        st.markdown(f"**GitHub:** {profile.github or '—'}")
+        st.markdown(f"**Skills:** {', '.join(profile.skills) or '—'}")
+        st.markdown(f"**Summary:** {profile.summary}")
+        if profile.parse_warnings:
+            st.warning(" ".join(profile.parse_warnings))
+    with col2:
+        render_score_breakdown_chart(breakdown)
+
+    st.markdown("**Full explanation (deterministic, generated from the scores above):**")
+    st.info(breakdown.explanation())
+
+    # --- Compare candidates ---
+    st.subheader("Compare candidates")
+    compare_choices = st.multiselect("Pick 2 or more candidates to compare", names, default=names[: min(2, len(names))])
+    if len(compare_choices) >= 2:
+        compare_rows = []
+        for choice in compare_choices:
+            i = names.index(choice)
+            _, r = results[i]
+            compare_rows.append(
+                {
+                    "Name": r.profile.name,
+                    "Final score": round(r.breakdown.final_score * 100, 1),
+                    "Skill": r.breakdown.skill_score,
+                    "Semantic": r.breakdown.semantic_score,
+                    "Experience": r.breakdown.experience_score,
+                    "Education": r.breakdown.education_score,
+                    "Missing skills": ", ".join(r.breakdown.missing_required_skills) or "none",
+                }
+            )
+        st.dataframe(pd.DataFrame(compare_rows), width='stretch', hide_index=True)
+
+    # --- Vector search (bonus feature) ---
+    with st.expander("Find similar candidates (bonus: vector search)"):
+        if len(profiles_for_vectors) < 2:
+            st.write("Upload at least 2 resumes to enable similarity search.")
+        else:
+            store = VectorStore()
+            store.build(
+                [p.raw_text for p in profiles_for_vectors],
+                [VectorRecord(record_id=str(i), label=p.name or f"Candidate {i}") for i, p in enumerate(profiles_for_vectors)],
+            )
+            query_name = st.selectbox("Find candidates similar to:", [p.name for p in profiles_for_vectors])
+            query_profile = next(p for p in profiles_for_vectors if p.name == query_name)
+            similar = store.most_similar(query_profile.raw_text, top_k=len(profiles_for_vectors))
+            sim_df = pd.DataFrame(
+                [(rec.label, score) for rec, score in similar if rec.label != query_name],
+                columns=["Candidate", "Similarity"],
+            )
+            st.dataframe(sim_df, width='stretch', hide_index=True)
+
+
+if __name__ == "__main__":
+    main()

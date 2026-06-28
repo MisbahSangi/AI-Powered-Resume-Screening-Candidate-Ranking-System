@@ -1,0 +1,32 @@
+Ahmed Raza
+ahmed.raza@email.com | +92 333 1234567
+linkedin.com/in/ahmedraza | github.com/ahmedraza
+
+SUMMARY
+Backend-focused software engineer with three years of professional experience
+building production REST APIs and working with relational databases. Comfortable
+owning features end to end, from design through deployment.
+
+SKILLS
+Python, FastAPI, Django, PostgreSQL, MySQL, Git, Docker, REST APIs, Linux, AWS,
+Unit Testing, CI/CD
+
+EXPERIENCE
+Backend Engineer at BrightTech Solutions
+Aug 2023 - Present
+Built and maintained REST APIs using FastAPI and PostgreSQL, serving over 50,000
+daily active users. Containerized services with Docker and deployed via CI/CD
+pipelines on AWS.
+
+Software Developer at CodeWorks
+Jul 2021 - Jul 2023
+Developed internal tools using Django and MySQL. Collaborated with frontend
+engineers on API contracts and wrote unit tests for critical business logic.
+
+EDUCATION
+Bachelor of Science in Computer Science, University of the Punjab
+2017 - 2021
+
+PROJECTS
+Inventory Management API - FastAPI + PostgreSQL backend for tracking warehouse
+stock levels with role-based access control.
