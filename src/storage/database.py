@@ -141,3 +141,14 @@ def get_rankings_for_job(conn: sqlite3.Connection, job_id: int) -> List[sqlite3.
            ORDER BY s.final_score DESC""",
         (job_id,),
     ).fetchall()
+
+
+def get_all_jobs(conn: sqlite3.Connection) -> List[sqlite3.Row]:
+    """List every job posting ever screened, most recent first — powers the
+    'past job postings' history view so a recruiter can revisit a previous
+    screening run without re-uploading anything.
+    """
+    return conn.execute(
+        """SELECT id, title, required_experience_years, required_education_level, created_at
+           FROM jobs ORDER BY created_at DESC"""
+    ).fetchall()

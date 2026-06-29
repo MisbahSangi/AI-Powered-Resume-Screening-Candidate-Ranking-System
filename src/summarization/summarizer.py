@@ -31,7 +31,6 @@ def summarize(text: str, num_sentences: int = 3) -> str:
 
 
 def generate_recommendation(breakdown) -> str:
-    
     if breakdown.final_score >= 0.75:
         verdict = "Strong match — recommended to shortlist."
     elif breakdown.final_score >= 0.5:

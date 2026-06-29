@@ -11,6 +11,7 @@ _MONTH_MAP = {
 
 
 def _parse_single_date(token: str, *, end_of_period: bool) -> datetime.date:
+    """Parse a date token like 'Jan 2022', '2022', or 'Present'."""
     token = token.strip()
     if token.lower() in ("present", "current", "now"):
         return datetime.date.today()

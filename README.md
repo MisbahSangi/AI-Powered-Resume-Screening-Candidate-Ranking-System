@@ -1,5 +1,7 @@
 # AI-Powered Resume Screening & Candidate Ranking System
 
+**Teyzix Core Internship — Task AI-2** | Built by Misbah Abdullah (FA23-BSE-064)
+
 A hybrid AI system that parses resumes, extracts structured candidate data,
 analyzes job descriptions, and produces a ranked, fully explainable
 shortlist — without depending on a paid LLM API for the core scoring.
@@ -191,3 +193,47 @@ python -m pytest tests/test_pipeline.py -v
 | Keyword extraction | TF-IDF sentence scoring (summarizer) + skill matching |
 | Recommendation generation | `generate_recommendation()` — deterministic, from score breakdown |
 
+## Bonus features implemented
+
+- **Skill Gap Analysis** — aggregated missing-required-skills view across all candidates (dashboard)
+- **Vector Search** — "find similar candidates" using a numpy-based embedding store
+- **Multi-Job Candidate Matching** — already-parsed candidates can be re-scored against a *second* job description with one click, reusing the full explainable scoring engine (not just embedding similarity) — no re-uploading or re-parsing needed
+- **Candidate Clustering** — KMeans grouping over the same embedding space, exposed directly in the dashboard with an adjustable cluster count
+
+Not implemented given the project's tight 2-day timeline (genuinely useful,
+but not free the way the above are): Interview Question Generation, AI Chat
+Assistant for Recruiters, Resume Improvement Suggestions. The cleanest
+extension point for these is a local LLM (e.g. Ollama) used purely to
+*phrase* output from the existing deterministic data — see the docstring in
+`summarizer.generate_recommendation()`.
+
+## Persistence (SQLite)
+
+Every processed screening — job description, all candidates, and their full
+score breakdowns — is saved to `data/app.db` automatically (toggleable via
+a sidebar checkbox). A "Screening history" panel at the top of the
+dashboard lists every past job posting and lets you revisit its rankings
+without re-uploading anything, confirmed to survive a full page reload.
+
+This was *not* true in an earlier version of this project: `database.py`
+existed and was unit-tested in isolation, but was never actually called
+from `app.py`. Worth saying plainly, since it's exactly the kind of gap
+that looks fine in a code review and only shows up when you actually use
+the running app.
+
+## A real bug this project caught (and fixed) along the way
+
+Streamlit reruns the entire script on every widget interaction, and
+`st.button(...)` only returns `True` on the one rerun immediately
+following its click. Early code gated the *entire* results section behind
+`if not run_clicked: return` — which meant selecting a different candidate
+from the dropdown, changing the compare list, or clicking any other button
+after processing would silently reset the whole page back to the empty
+state, since `run_clicked` evaluates to `False` on every rerun except the
+exact one where that button was clicked.
+
+Fixed by moving processed results into `st.session_state`, so they persist
+across any later interaction until the user explicitly reprocesses. A
+regression test (`tests/bonus_features_test.py`) specifically exercises
+"change the candidate dropdown after processing" to make sure this can't
+silently come back.

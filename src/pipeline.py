@@ -19,7 +19,6 @@ DEFAULT_TAXONOMY_PATH = Path(__file__).resolve().parents[1] / "data" / "skills_t
 
 @dataclass
 class CandidateProfile:
-
     source_path: str
     name: Optional[str]
     email: Optional[str]
@@ -35,7 +34,6 @@ class CandidateProfile:
 
 
 def build_candidate_profile(resume_path: str | Path, taxonomy: SkillTaxonomy) -> CandidateProfile:
-    """Layer 1 + 2 combined: parse a resume file into a structured profile."""
     parsed: ParsedResume = parse_resume(resume_path)
 
     header_text = parsed.section("header")
@@ -112,7 +110,6 @@ def rank_candidates(
     taxonomy_path: str | Path = DEFAULT_TAXONOMY_PATH,
     weights: ScoringWeights | None = None,
 ) -> List[CandidateResult]:
-    """End-to-end: many resume files + one job description -> ranked results."""
     taxonomy = SkillTaxonomy(taxonomy_path)
     jd = build_job_requirements(jd_text, taxonomy)
 

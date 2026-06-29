@@ -27,6 +27,13 @@ class VectorStore:
         return self._matrix is None or len(self._records) == 0
 
     def build(self, texts: List[str], records: List[VectorRecord]) -> None:
+        """Fit a shared embedding space over `texts` and store the vectors.
+
+        Tries sentence-transformers first (better semantics), falls back to
+        TF-IDF (always available) — same backend-detection pattern as
+        semantic_similarity.py, kept separate because this one needs a
+        *corpus-level* fit rather than a pairwise comparison.
+        """
         assert len(texts) == len(records), "texts and records must align 1:1"
 
         try:
@@ -52,6 +59,12 @@ class VectorStore:
         return model.transform([text]).toarray()[0]
 
     def most_similar(self, text: str, top_k: int = 5) -> List[Tuple[VectorRecord, float]]:
+        """Find the `top_k` stored records most similar to `text`.
+
+        Used for both Vector Search (find similar candidates to a resume)
+        and Multi-Job Matching (find candidates similar to a NEW job
+        description, without re-running the full extraction pipeline).
+        """
         if self.is_empty:
             return []
         query_vec = self._embed_query(text).reshape(1, -1)

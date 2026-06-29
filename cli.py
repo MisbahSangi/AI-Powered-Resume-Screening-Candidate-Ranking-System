@@ -1,15 +1,3 @@
-"""
-cli.py
--------
-Command-line interface for batch resume screening — useful for processing
-a folder of resumes without opening the dashboard, or for scripting/CI use.
-
-Usage:
-    python cli.py --jd data/sample_job_descriptions/backend_engineer_jd.txt \\
-                   --resumes data/sample_resumes/*.pdf data/sample_resumes/*.txt \\
-                   --output results.csv
-"""
-
 from __future__ import annotations
 
 import argparse

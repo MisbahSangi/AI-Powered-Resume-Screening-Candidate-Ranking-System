@@ -1,15 +1,3 @@
-"""
-test_pipeline.py
-------------------
-Automated checks for the core pipeline. Run with: pytest tests/test_pipeline.py -v
-
-These aren't exhaustive (a 2-day build prioritizes breadth of working
-features over 100% test coverage), but they lock in the specific bugs
-found and fixed during development — the education-level false-positive
-and the experience/org section-leakage issue — so they can't silently
-come back.
-"""
-
 import sys
 from pathlib import Path
 
@@ -102,6 +90,26 @@ def test_end_to_end_ranking_orders_candidates_sensibly():
     names_in_rank_order = [r.profile.name for r in results]
     assert names_in_rank_order[0] == "Ahmed Raza"  # strong backend match
     assert results[0].breakdown.final_score > results[-1].breakdown.final_score
+
+
+def test_docx_parsing_with_real_file(taxonomy):
+    """Regression test: DOCX parsing was previously unverified (code existed
+    but was never run against an actual .docx file). Confirmed working as
+    of this test — extracts name, contact info, skills, experience, and
+    education correctly from a real python-docx-generated file.
+    """
+    from src.pipeline import build_candidate_profile
+
+    docx_path = SAMPLE_RESUMES / "hina_tariq.docx"
+    assert docx_path.exists(), "Sample DOCX fixture is missing"
+
+    profile = build_candidate_profile(docx_path, taxonomy)
+    assert profile.name == "Hina Tariq"
+    assert profile.email == "hina.tariq@email.com"
+    assert "Python" in profile.skills
+    assert "FastAPI" in profile.skills
+    assert profile.education_level == 2  # Bachelor's
+    assert profile.experience_years > 0
 
 
 def test_scoring_weights_must_sum_to_one():

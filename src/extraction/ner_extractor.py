@@ -8,7 +8,6 @@ _SPACY_LOAD_ATTEMPTED = False
 
 
 def _get_spacy_model():
-    """Lazily try to load en_core_web_sm exactly once. Never raises."""
     global _SPACY_NLP, _SPACY_LOAD_ATTEMPTED
     if _SPACY_LOAD_ATTEMPTED:
         return _SPACY_NLP

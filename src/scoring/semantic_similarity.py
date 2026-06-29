@@ -59,6 +59,9 @@ def _sbert_similarity(text_a: str, text_b: str, model) -> float:
 
 
 def compute_similarity(text_a: str, text_b: str) -> float:
+    """Return a 0..1 similarity score between two texts, using the best
+    available backend.
+    """
     model = _try_load_sentence_transformer()
     if model is not None:
         return _sbert_similarity(text_a, text_b, model)

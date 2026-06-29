@@ -89,6 +89,7 @@ _HEADER_RE = _build_header_regex()
 
 
 def _classify_header(line: str) -> str | None:
+    """Return the canonical section name if `line` looks like a header."""
     cleaned = line.strip()
     if not cleaned or len(cleaned) > 40:
         return None

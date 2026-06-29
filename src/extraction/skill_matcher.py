@@ -18,7 +18,6 @@ class SkillMatch:
 
 
 class SkillTaxonomy:
-
     def __init__(self, taxonomy_path: str | Path):
         with open(taxonomy_path, "r", encoding="utf-8") as f:
             raw = json.load(f)

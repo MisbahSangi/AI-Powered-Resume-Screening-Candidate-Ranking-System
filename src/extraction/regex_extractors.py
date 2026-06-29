@@ -29,6 +29,7 @@ def extract_email(text: str) -> Optional[str]:
 
 
 def extract_phone(text: str) -> Optional[str]:
+    """Find the first plausible phone number (at least 7 digits total)."""
     for match in PHONE_RE.finditer(text):
         digits = re.sub(r"\D", "", match.group(0))
         if len(digits) >= 7:
