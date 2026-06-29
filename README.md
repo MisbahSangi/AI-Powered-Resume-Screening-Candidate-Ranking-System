@@ -1,13 +1,5 @@
 # AI-Powered Resume Screening & Candidate Ranking System
 
-**Teyzix Core Internship — Task AI-2** | Built by Misbah Abdullah (FA23-BSE-064)
-
-A hybrid AI system that parses resumes, extracts structured candidate data,
-analyzes job descriptions, and produces a ranked, fully explainable
-shortlist — without depending on a paid LLM API for the core scoring.
-
----
-
 ## Why hybrid, not a single LLM API call?
 
 It would be possible to build this by sending each resume + job description
